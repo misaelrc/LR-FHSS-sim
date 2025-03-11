@@ -1,9 +1,9 @@
 from lrfhss.lrfhss_core import Base
 
 class BaseACRDA(Base):
-    def __init__(self, obw, window_size, window_step, time_on_air, threshold):
+    def __init__(self, obw, window_size, window_step, time_on_air, threshold, fading_threshold):
 
-        super().__init__(obw, threshold)
+        super().__init__(obw, threshold, fading_threshold)
         self.memory = {}
         self.window_size = window_size*time_on_air
         self.window_step = window_step*time_on_air

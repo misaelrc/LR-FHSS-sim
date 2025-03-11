@@ -1,6 +1,7 @@
 from lrfhss.lrfhss_core import *
 from lrfhss.acrda import BaseACRDA
 from lrfhss.settings import Settings
+
 import simpy
 
 def run_sim(settings: Settings, seed=0):
@@ -8,14 +9,14 @@ def run_sim(settings: Settings, seed=0):
     np.random.seed(seed)
     env = simpy.Environment()
     if settings.base=='acrda':
-        bs = BaseACRDA(settings.obw, settings.window_size, settings.window_step, settings.time_on_air, settings.threshold)
+        bs = BaseACRDA(settings.obw, settings.window_size, settings.window_step, settings.time_on_air, settings.threshold, settings.fading_threshold)
         env.process(bs.sic_window(env))
     else:
-        bs = Base(settings.obw, settings.threshold)
+        bs = Base(settings.obw, settings.threshold, settings.fading_threshold)
     
     nodes = []
     for i in range(settings.number_nodes):
-        node = Node(settings.obw, settings.headers, settings.payloads, settings.header_duration, settings.payload_duration, settings.transceiver_wait, settings.traffic_generator)
+        node = Node(settings.obw, settings.headers, settings.payloads, settings.header_duration, settings.payload_duration, settings.transceiver_wait, settings.traffic_generator, settings.fading_generator)
         bs.add_node(node.id)
         nodes.append(node)
         env.process(node.transmit(env, bs))
