@@ -65,7 +65,7 @@ class Fading(ABC):
         pass
         
 class Node():
-    def __init__(self, obw, headers, payloads, header_duration, payload_duration, transceiver_wait, traffic_generator, fading_generator):
+    def __init__(self, obw, headers, payloads, header_duration, payload_duration, transceiver_wait, traffic_generator, fading_generator, max_distance, transmission_power):
         self.id = id(self)
         self.transmitted = 0
         self.traffic_generator = traffic_generator
@@ -78,7 +78,9 @@ class Node():
         self.header_duration = header_duration
         self.payload_duration = payload_duration
         self.packet = Packet(self.id, self.obw, self.headers, self.payloads, self.header_duration, self.payload_duration, self.fading_generator)
-        
+        self.distance = random.uniform(0, max_distance)
+        self.transmission_power = transmission_power
+
     def next_transmission(self):
         return self.traffic_generator.traffic_function()
 
@@ -105,7 +107,7 @@ class Node():
                 #wait the duration (time on air) of the fragment
                 yield env.timeout(next_fragment.duration)
                 #removes the fragment from the list.
-                bs.finish_fragment(next_fragment)
+                bs.finish_fragment(next_fragment, self.distance, self.transmission_power)
                 #check if base can decode the packet now.
                 #tries to decode if not decoded yet.
                 if self.packet.success == 0:
@@ -117,14 +119,14 @@ class Node():
             self.end_of_transmission()
 
 class Base():
-    def __init__(self, obw, threshold, fading_threshold):
+    def __init__(self, obw, threshold, sensitivity):
         self.id = id(self)
         self.transmitting = {}
         for channel in range(obw):
             self.transmitting[channel] = []
         self.packets_received = {}
         self.threshold = threshold
-        self.fading_threshold = fading_threshold
+        self.sensitivity = sensitivity
 
     def add_packet(self, packet):
         pass
@@ -135,10 +137,15 @@ class Base():
     def receive_packet(self, fragment):
         self.transmitting[fragment.channel].append(fragment)
 
-    def finish_fragment(self, fragment):
+    def finish_fragment(self, fragment, distance, transmission_power):
         self.transmitting[fragment.channel].remove(fragment)
+        transmission_power_W = 10 ** (transmission_power/10) #em watts
+        sensitivity_W = 10 ** (self.sensitivity / 10) #em watts
+
+        snr = (transmission_power_W * (fragment.intensity**2))/(distance**4)
+
         #só tem sucesso se além de não ter colisão, intensidade maior que threshold
-        if len(fragment.collided) == 0 and fragment.intensity > self.fading_threshold:
+        if len(fragment.collided) == 0 and snr > sensitivity_W:
             fragment.success = 1
         fragment.transmitted = 1
  

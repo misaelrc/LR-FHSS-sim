@@ -8,7 +8,7 @@ import inspect
 class Settings():
     def __init__(self, number_nodes=80000//8, simulation_time=60*60, payload_size = 10, headers = 3, header_duration = 0.233472, payloads = None, threshold = None, payload_duration = 0.1024,
                  code = '1/3', traffic_class = Exponential_Traffic, traffic_param = {'average_interval': 900}, transceiver_wait = 0.006472, obw = 35, base='core', window_size = 2, window_step = 0.5,
-                 fading_class = No_Fading, fading_param = {}, fading_threshold=0):
+                 sensitivity=140, fading_class = No_Fading, max_distance = 1000, transmission_power = 200, fading_param = {}):
         self.number_nodes = number_nodes
         self.simulation_time = simulation_time
         self.payload_size = payload_size
@@ -20,6 +20,9 @@ class Settings():
         self.base = base
         self.window_size = window_size
         self.window_step = window_step
+        self.sensitivity = sensitivity
+        self.max_distance = max_distance
+        self.transmission_power = transmission_power
 
         if payloads:
             self.payloads = payloads
@@ -65,4 +68,4 @@ class Settings():
 
         self.traffic_generator = traffic_class(traffic_param)
         self.fading_generator = fading_class(fading_param)
-        self.fading_threshold = fading_threshold
+       

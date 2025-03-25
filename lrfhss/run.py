@@ -9,14 +9,14 @@ def run_sim(settings: Settings, seed=0):
     np.random.seed(seed)
     env = simpy.Environment()
     if settings.base=='acrda':
-        bs = BaseACRDA(settings.obw, settings.window_size, settings.window_step, settings.time_on_air, settings.threshold, settings.fading_threshold)
+        bs = BaseACRDA(settings.obw, settings.window_size, settings.window_step, settings.time_on_air, settings.threshold, settings.sensitivity)
         env.process(bs.sic_window(env))
     else:
-        bs = Base(settings.obw, settings.threshold, settings.fading_threshold)
+        bs = Base(settings.obw, settings.threshold, settings.sensitivity)
     
     nodes = []
     for i in range(settings.number_nodes):
-        node = Node(settings.obw, settings.headers, settings.payloads, settings.header_duration, settings.payload_duration, settings.transceiver_wait, settings.traffic_generator, settings.fading_generator)
+        node = Node(settings.obw, settings.headers, settings.payloads, settings.header_duration, settings.payload_duration, settings.transceiver_wait, settings.traffic_generator, settings.fading_generator, settings.max_distance, settings.transmission_power)
         bs.add_node(node.id)
         nodes.append(node)
         env.process(node.transmit(env, bs))
@@ -37,4 +37,5 @@ def run_sim(settings: Settings, seed=0):
     #return success_per_device
 if __name__ == "__main__":
    s = Settings()
+   print(s.sensitivity)
    print(run_sim(s))
