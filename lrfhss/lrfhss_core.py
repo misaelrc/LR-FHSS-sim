@@ -139,8 +139,8 @@ class Base():
 
     def finish_fragment(self, fragment, distance, transmission_power):
         self.transmitting[fragment.channel].remove(fragment)
-        transmission_power_W = 10 ** (transmission_power/10) #em watts
-        sensitivity_W = 10 ** (self.sensitivity / 10) #em watts
+        transmission_power_W = 10 ** (transmission_power / 10) / 1000
+        sensitivity_W = 10 ** (self.sensitivity / 10) / 1000
 
         snr = (transmission_power_W * (fragment.intensity**2))/(distance**4)
 
